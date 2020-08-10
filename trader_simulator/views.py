@@ -5,6 +5,7 @@ from trader_simulator.models import InvestmentLog
 from django.contrib.auth.forms import UserCreationForm
 from trader_simulator.external_data.exchange_apis import MarketData
 from trader_simulator.external_data.exchange_apis_config import AVAILABLE_INVESTMENTS
+from django.contrib.auth.decorators import login_required
 
 
 def home(request):
@@ -24,6 +25,7 @@ def registration(request):
         return render(request, 'registration.html', context=context)
 
 
+@login_required(login_url='/login')
 def new_investment(request):
     available_investments = AVAILABLE_INVESTMENTS
 
@@ -51,6 +53,7 @@ def new_investment(request):
     return render(request, 'investment_form.html', context=context)
 
 
+@login_required(login_url='/login')
 def my_wallet(request):
     username = request.user.username
     user_investments = list(

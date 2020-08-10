@@ -1,16 +1,31 @@
 <html lang="en">
-  <head>
+    <head>
     <title>New Investment</title>
-  </head>
-  <body>
+    </head>
+    <body>
     <div>
         <h1>NEW INVESTMENT</h1>
+        <br>
+        <p> MENU </p>
+        <div>
+            <a href="/logout">
+                <button type="button" name="button">Logout</button>
+            </a>
+        </div>
+        <br>
+        <div>
+            <a href="/my_wallet">
+                <button type="button" name="button">My Wallet</button>
+            </a>
+        </div>
+        <br>
     </div>
     <form action={% url 'trader_simulator:new_investment' %} method='get'>
-      <div>
-        {{ form.investment_amount }}
-      </div>
-      <input type='submit' value='Search Investments'/>
-   </form>
-  </body>
+        <div>
+            <p>Insert Amount to Invest in American Dollars (USD):</p>
+            {{ form.investment_amount }}
+        </div>
+        <input type='submit' value='Search Investments'/>
+     </form>
+    </body>
 </html>
