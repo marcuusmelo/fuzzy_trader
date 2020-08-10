@@ -1,3 +1,7 @@
 from django.shortcuts import render
 
-# Create your views here.
+def new_investment(request):
+    pass
+
+def my_wallet(request):
+    pass
