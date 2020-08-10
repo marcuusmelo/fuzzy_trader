@@ -65,14 +65,17 @@ class TestTraderSimulator(TestCase):
         """
         test_username = 'test_user_0001'
         self.client.login(username=test_username, password='secretpw0001')
-        InvestmentLog.objects.bulk_create([
-            InvestmentLog(username=test_username, investment_symbol='AAPL', quantity=10),
-            InvestmentLog(username=test_username, investment_symbol='AAPL', quantity=15),
-            InvestmentLog(username=test_username, investment_symbol='AAPL', quantity=20)
-        ])
-        InvestmentLog.save()
+
+        investment_entry = {
+            'username': test_username,
+            'investment_symbol': 'AAPL',
+            'quantity': 7
+        }
+
+        for _ in range(3):
+            InvestmentLog(**investment_entry).save()
 
         url = reverse('trader_simulator:my_wallet')
         response = self.client.get(url)
 
-        self.assertEqual(response.context['AAPL']['quantity'], 45)
+        self.assertEqual(response.context['investments'][0]['total_quantity'], 21)
