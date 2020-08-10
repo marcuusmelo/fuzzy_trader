@@ -3,6 +3,7 @@ Collection of tests for the Trader Simulator App
 """
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.contrib.auth.models import User
 
 from trader_simulator.forms import InvestmentInputForm
 from trader_simulator.models import InvestmentLog
@@ -48,10 +49,13 @@ class TestTraderSimulator(TestCase):
         Check if selected investment gets to InvestmentLog table
         """
         test_username = 'test_user_0000'
-        self.client.login(username=test_username, password='secretpw0000')
+        test_password = 'secretpw0000'
+        self.user = User.objects.create_user(username=test_username, password=test_password)
+        self.client.login(username=test_username, password=test_password)
+
         investment_data = {
-            'investment_amount': 1000,
-            'investment_selection': 'AAPL',
+            'investment_symbol': 'AAPL',
+            'quantity': 111,
         }
 
         url = reverse('trader_simulator:new_investment')
@@ -64,7 +68,9 @@ class TestTraderSimulator(TestCase):
         Check if the sum of the investments added matches the expected result
         """
         test_username = 'test_user_0001'
-        self.client.login(username=test_username, password='secretpw0001')
+        test_password = 'secretpw0001'
+        self.user = User.objects.create_user(username=test_username, password=test_password)
+        self.client.login(username=test_username, password=test_password)
 
         investment_entry = {
             'username': test_username,

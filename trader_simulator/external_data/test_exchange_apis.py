@@ -1,5 +1,6 @@
 import unittest
 from trader_simulator.external_data.exchange_apis import MarketData
+from trader_simulator.external_data.exchange_apis_config import AVAILABLE_INVESTMENTS
 
 class TestsMarketData(unittest.TestCase):
     def setUp(self):
@@ -20,6 +21,26 @@ class TestsMarketData(unittest.TestCase):
     def test_get_stock_info(self):
         apple_info = self.market_data._get_stock_info('AAPL')
         self.assertEqual(apple_info['name'], 'Apple Inc')
+
+    def test_get_value(self):
+        apple_value = self.market_data.get_value('AAPL', 10)
+        self.assertEqual(type(apple_value), float)
+
+    def test_get_rate(self):
+        apple_rate = self.market_data.get_rate('AAPL')
+        self.assertEqual(type(apple_rate), float)
+
+    def test_get_info(self):
+        symbol = 'AAPL'
+        apple_info = self.market_data.get_info(symbol)
+        self.assertEqual(apple_info['name'], 'Apple Inc')
+
+    def test_get_all_data(self):
+        all_info = self.market_data.get_all_data()
+        all_symbols = []
+        for investment_type, symbol_list in AVAILABLE_INVESTMENTS.items():
+            all_symbols += symbol_list
+        self.assertEqual(len(all_info), len(all_symbols))
 
 
 if __name__ == '__main__':
