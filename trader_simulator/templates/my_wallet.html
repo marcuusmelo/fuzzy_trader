@@ -1,0 +1,10 @@
+<h1>MY WALLET</h1>
+<br>
+{% for investment in investments %}
+<h4> ASSET: {{ investment.investment_symbol }} </h4>
+<h4> QUANTITY: {{ investment.total_quantity }} </h4>
+<h4> VALUE: {{ investment.value }} </h4>
+<h4>- - - - - - - - - - - - - - - <h4>
+{% endfor %}
+<br>
+<h2>TOTAL: {{ total_value }}</h2>
