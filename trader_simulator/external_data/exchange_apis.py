@@ -6,8 +6,13 @@ is too low, the design decision here was to continue using it as font of extra i
 investments offered, and use 2 other APIs to get the real time rate.
 """
 import os
+import pytz
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
+
+import django
+django.setup()
+from trader_simulator.models import CryptocurrencyInfo, StockInfo
 
 class MarketData():
     """
@@ -34,18 +39,31 @@ class MarketData():
         Get cryptocurrency info for a given symbol, from alpha vantage
         """
         now_datetime = datetime.now()
-        crypto_info_url = "https://www.alphavantage.co/query?function=CRYPTO_RATING&symbol={0}&apikey={1}"
-        request_url = crypto_info_url.format(symbol, self.alpha_vantage_key)
-        response = requests.get(request_url)
-        response_data = response.json()
+        now_datetime = now_datetime.replace(tzinfo=pytz.UTC)
 
-        # format keys and select needed data
-        cryptocurrency_info = {}
-        cryptocurrency_info['symbol'] = response_data['Crypto Rating (FCAS)']['1. symbol']
-        cryptocurrency_info['name'] = response_data['Crypto Rating (FCAS)']['2. name']
-        cryptocurrency_info['fcas_rating'] = response_data['Crypto Rating (FCAS)']['3. fcas rating']
-        cryptocurrency_info['fcas_score'] = response_data['Crypto Rating (FCAS)']['4. fcas score']
-        cryptocurrency_info['source_datetime'] = now_datetime
+        try:
+            cryptocurrency_info = CryptocurrencyInfo.objects.values().filter(symbol__exact=symbol)[0]
+        except IndexError:
+            cryptocurrency_info = {}
+
+        if not cryptocurrency_info or (now_datetime - cryptocurrency_info['source_datetime']) > timedelta(days=1):
+            if cryptocurrency_info:
+                CryptocurrencyInfo.objects.filter(symbol__exact=symbol).delete()
+
+            crypto_info_url = "https://www.alphavantage.co/query?function=CRYPTO_RATING&symbol={0}&apikey={1}"
+            request_url = crypto_info_url.format(symbol, self.alpha_vantage_key)
+            response = requests.get(request_url)
+            response_data = response.json()
+
+            # format keys and select needed data
+            cryptocurrency_info = {}
+            cryptocurrency_info['symbol'] = response_data['Crypto Rating (FCAS)']['1. symbol']
+            cryptocurrency_info['name'] = response_data['Crypto Rating (FCAS)']['2. name']
+            cryptocurrency_info['fcas_rating'] = response_data['Crypto Rating (FCAS)']['3. fcas rating']
+            cryptocurrency_info['fcas_score'] = response_data['Crypto Rating (FCAS)']['4. fcas score']
+            cryptocurrency_info['source_datetime'] = now_datetime
+
+            CryptocurrencyInfo(**cryptocurrency_info).save()
 
         return cryptocurrency_info
 
@@ -64,17 +82,30 @@ class MarketData():
         Get stock info for a given symbol, from alpha vantage
         """
         now_datetime = datetime.now()
-        stock_info_url = "https://www.alphavantage.co/query?function=OVERVIEW&symbol={0}&apikey={1}"
-        request_url = stock_info_url.format(symbol, self.alpha_vantage_key)
-        response = requests.get(request_url)
-        response_data = response.json()
+        now_datetime = now_datetime.replace(tzinfo=pytz.UTC)
 
-        # format keys and select needed data
-        stock_info = {}
-        stock_info['symbol'] = response_data['Symbol']
-        stock_info['name'] = response_data['Name']
-        stock_info['gross_profit'] = response_data['GrossProfitTTM']
-        stock_info['quartely_revenue_growth'] = response_data['QuarterlyRevenueGrowthYOY']
-        stock_info['source_datetime'] = now_datetime
+        try:
+            stock_info = StockInfo.objects.values().filter(symbol__exact=symbol)[0]
+        except IndexError:
+            stock_info = {}
+
+        if not stock_info or (now_datetime - stock_info['source_datetime']) > timedelta(days=1):
+            if stock_info:
+                StockInfo.objects.filter(symbol__exact=symbol).delete()
+
+            stock_info_url = "https://www.alphavantage.co/query?function=OVERVIEW&symbol={0}&apikey={1}"
+            request_url = stock_info_url.format(symbol, self.alpha_vantage_key)
+            response = requests.get(request_url)
+            response_data = response.json()
+
+            # format keys and select needed data
+            stock_info = {}
+            stock_info['symbol'] = response_data['Symbol']
+            stock_info['name'] = response_data['Name']
+            stock_info['gross_profit'] = response_data['GrossProfitTTM']
+            stock_info['quartely_revenue_growth'] = response_data['QuarterlyRevenueGrowthYOY']
+            stock_info['source_datetime'] = now_datetime
+
+            StockInfo(**stock_info).save()
 
         return stock_info
