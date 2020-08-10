@@ -1,4 +1,7 @@
-from django.forms import forms
+from django.forms import forms, IntegerField
 
 class InvestmentInputForm(forms.Form):
-    pass
+    """
+    Form to get amount to invest from user
+    """
+    investment_amount = IntegerField()
