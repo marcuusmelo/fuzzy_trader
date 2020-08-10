@@ -2,14 +2,14 @@
 <html lang="en" dir="ltr">
     <head>
         <meta charset="utf-8">
-        <title>Login</title>
+        <title>Registration</title>
     </head>
     <body>
-        <h1>Welcome, login to Fuzzy Trader platform</h1>
+        <h1>Welcome, create your account</h1>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit" name="button">Login</button>
+            <button type="submit" name="button">Submit</button>
         </form>
 
     </body>
