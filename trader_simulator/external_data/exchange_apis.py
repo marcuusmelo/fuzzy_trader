@@ -13,6 +13,8 @@ from datetime import datetime, timedelta
 import django
 django.setup()
 from trader_simulator.models import CryptocurrencyInfo, StockInfo
+from trader_simulator.external_data.exchange_apis_config import AVAILABLE_INVESTMENTS
+
 
 class MarketData():
     """
@@ -23,25 +25,63 @@ class MarketData():
         self.alpha_vantage_key = os.getenv('ALPHA_VANTAGE_KEY')
         self.coin_api_key = os.getenv('COIN_API_KEY')
         self.market_stack_key = os.getenv('MARKET_STACK_KEY')
-        self.investment_groups = {
-            'cryptocurrency': ['BTC', 'ETH'],
-            'stocks': ['AAPL', 'MSFT']
-        }
+        self.investment_groups = AVAILABLE_INVESTMENTS
+
+    def get_all_data(self, investment_amount=None):
+        """
+        Get infor and rate for all AVAILABLE_INVESTMENTS
+        """
+        all_data = []
+        for investment_type, symbol_list in self.investment_groups.items():
+            for symbol in symbol_list:
+                info = self.get_info(symbol)
+                rate = self.get_rate(symbol)
+                info['rate'] = rate
+                info['investment_type'] = investment_type
+
+                # If investment amount is given, add a field to inform how many can be acquired
+                if investment_amount is not None:
+                    quantity = int(investment_amount/rate)
+                    info['quantity'] = quantity
+                else:
+                    info['quantity'] = 0
+
+                all_data.append(info)
+
+        return all_data
+
+    def get_info(self, symbol):
+        """
+        Get additional info for a given investment
+        """
+        if symbol in self.investment_groups['cryptocurrency']:
+            info = self._get_cryptocurrency_info(symbol)
+        else:
+            info = self._get_stock_info(symbol)
+
+        return info
+
+    def get_rate(self, symbol):
+        """
+        Get the rate of an investment
+        """
+        if symbol in self.investment_groups['cryptocurrency']:
+            rate = self._get_cryptocurrency_rates(symbol)['rate']
+        else:
+            rate = self._get_stock_rates(symbol)['data'][0]['last']
+
+        return round(rate, 2)
 
     def get_value(self, symbol, quantity):
         """
         Get the total value of an investmen based on current rate
         """
-        if symbol in self.investment_groups['cryptocurrency']:
-            rate = self.get_cryptocurrency_rates(symbol)['rate']
-        else:
-            rate = self.get_stock_rates(symbol)['data'][0]['last']
-
+        rate = self.get_rate(symbol)
         total_value = rate * quantity
 
-        return total_value
+        return round(total_value, 2)
 
-    def get_cryptocurrency_rates(self, symbol):
+    def _get_cryptocurrency_rates(self, symbol):
         """
         Get cryptocurrency rates for a given symbol, from coinapi.io REST API
         """
@@ -51,7 +91,7 @@ class MarketData():
         response_data = response.json()
         return response_data
 
-    def get_cryptocurrency_info(self, symbol):
+    def _get_cryptocurrency_info(self, symbol):
         """
         Get cryptocurrency info for a given symbol, from alpha vantage
         """
@@ -84,7 +124,7 @@ class MarketData():
 
         return cryptocurrency_info
 
-    def get_stock_rates(self, symbol):
+    def _get_stock_rates(self, symbol):
         """
         Get stock rates for a given symbol, from market stack API
         """
@@ -94,7 +134,7 @@ class MarketData():
         response_data = response.json()
         return response_data
 
-    def get_stock_info(self, symbol):
+    def _get_stock_info(self, symbol):
         """
         Get stock info for a given symbol, from alpha vantage
         """
