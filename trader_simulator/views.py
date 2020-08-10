@@ -2,8 +2,26 @@ from django.shortcuts import render, redirect
 from django.db.models import Sum
 from trader_simulator.forms import InvestmentInputForm
 from trader_simulator.models import InvestmentLog
+from django.contrib.auth.forms import UserCreationForm
 from trader_simulator.external_data.exchange_apis import MarketData
 from trader_simulator.external_data.exchange_apis_config import AVAILABLE_INVESTMENTS
+
+
+def home(request):
+    return render(request, 'home.html')
+
+
+def registration(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('trader_simulator:my_wallet')
+    else:
+        form = UserCreationForm()
+        context = {'form': form}
+
+        return render(request, 'registration.html', context=context)
 
 
 def new_investment(request):
