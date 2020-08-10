@@ -1,13 +1,37 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Sum
+from trader_simulator.forms import InvestmentInputForm
 from trader_simulator.models import InvestmentLog
 from trader_simulator.external_data.exchange_apis import MarketData
+from trader_simulator.external_data.exchange_apis_config import AVAILABLE_INVESTMENTS
+
 
 def new_investment(request):
-    if request.method == 'GET':
-        pass
+    available_investments = AVAILABLE_INVESTMENTS
+
+    form = InvestmentInputForm()
+
+    if request.method == 'GET' and 'investment_amount' in request.GET:
+        market_data = MarketData()
+        investment_amount = float(request.GET['investment_amount'])
+        investment_data = market_data.get_all_data(investment_amount=investment_amount)
+        investments = {'data': investment_data}
+        return render(request, 'investment_select.html', context=investments)
+
     elif request.method == 'POST':
-        pass
+        username = request.user.username
+        investment_symbol = request.POST['investment_symbol']
+        quantity = request.POST['quantity']
+        InvestmentLog(
+            username=username,
+            investment_symbol=investment_symbol,
+            quantity=quantity
+        ).save()
+        return redirect('trader_simulator:my_wallet')
+
+    context = {'form': form}
+    return render(request, 'investment_form.html', context=context)
+
 
 def my_wallet(request):
     username = request.user.username
