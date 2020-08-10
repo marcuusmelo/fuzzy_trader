@@ -15,5 +15,7 @@ class StockInfo(models.Model):
     quartely_revenue_growth = models.FloatField()
     source_datetime = models.DateTimeField()
 
-# class InvestmentLog(models.Model):
-#     pass
+class InvestmentLog(models.Model):
+    username = models.CharField(max_length=128)
+    investment_symbol = models.CharField(max_length=32)
+    quantity = models.IntegerField()
