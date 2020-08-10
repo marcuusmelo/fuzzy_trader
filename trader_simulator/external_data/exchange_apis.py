@@ -23,6 +23,23 @@ class MarketData():
         self.alpha_vantage_key = os.getenv('ALPHA_VANTAGE_KEY')
         self.coin_api_key = os.getenv('COIN_API_KEY')
         self.market_stack_key = os.getenv('MARKET_STACK_KEY')
+        self.investment_groups = {
+            'cryptocurrency': ['BTC', 'ETH'],
+            'stocks': ['AAPL', 'MSFT']
+        }
+
+    def get_value(self, symbol, quantity):
+        """
+        Get the total value of an investmen based on current rate
+        """
+        if symbol in self.investment_groups['cryptocurrency']:
+            rate = self.get_cryptocurrency_rates(symbol)['rate']
+        else:
+            rate = self.get_stock_rates(symbol)['data'][0]['last']
+
+        total_value = rate * quantity
+
+        return total_value
 
     def get_cryptocurrency_rates(self, symbol):
         """
