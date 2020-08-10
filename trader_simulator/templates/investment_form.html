@@ -1,0 +1,16 @@
+<html lang="en">
+  <head>
+    <title>New Investment</title>
+  </head>
+  <body>
+    <div>
+        <h1>NEW INVESTMENT</h1>
+    </div>
+    <form action={% url 'trader_simulator:new_investment' %} method='get'>
+      <div>
+        {{ form.investment_amount }}
+      </div>
+      <input type='submit' value='Search Investments'/>
+   </form>
+  </body>
+</html>

@@ -1,0 +1,47 @@
+<html lang="en">
+  <head>
+    <title>Select Investment</title>
+  </head>
+  <body>
+    <div>
+        <h1>SELECT YOUR NEW INVESTMENT</h1>
+    </div>
+      <div>
+        {% for investment in data %}
+            <h4>{{ investment.symbol }}</h4>
+
+            <p>Name: {{ investment.name }}</p>
+            <p>Type: {{ investment.investment_type }}</p>
+            <p>Rate: {{ investment.rate }} USD per unit</p>
+
+            {% if investment.investment_type == 'stocks' %}
+                <p>Gross Profit: {{ investment.gross_profit }}</p>
+                <p>Quarterly Revenue Growth: {{ investment.quartely_revenue_growth }}</p>
+
+            {% elif investment.investment_type == 'cryptocurrency' %}
+                <p>FCAS Score: {{ investment.fcas_score }}</p>
+                <p>FCAS Rating: {{ investment.fcas_rating }}</p>
+
+            {% endif %}
+
+            <p>BUYING AMOUNT: {{ investment.quantity }} unit(s)</p>
+
+            {% if investment.quantity > 0 %}
+                <form action={% url 'trader_simulator:new_investment' %} method='post'>
+                  {% csrf_token %}
+                  <div>
+                    <input type="hidden" name="username" value="{{ username }}">
+                    <input type="hidden" name="investment_symbol" value="{{ investment.symbol }}">
+                    <input type="hidden" name="quantity" value="{{ investment.quantity }}">
+                  </div>
+                  <input type='submit' value='Select Investment'/>
+               </form>
+            {% else %}
+                <button>NOT AVAILABLE, BIGGER INVESTMENT REQUIRED</button>
+            {% endif %}
+
+            <h4>- - - - - - - - - - - - - - - <h4>
+        {% endfor %}
+      </div>
+  </body>
+</html>
